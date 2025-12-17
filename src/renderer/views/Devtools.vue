@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import type { PerfectScrollbarExpose } from 'vue3-perfect-scrollbar'
 import { i18n } from '@/electron'
 import { router, RouterName } from '@/router'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+const scrollRef = useTemplateRef<PerfectScrollbarExpose>('scrollRef')
 
 const isActiveRoute = computed(() => {
   return (name: string) => route.name === name
@@ -77,6 +79,26 @@ const webNav = [
     name: RouterName.devtoolsSlugify,
   },
 ]
+
+const generatorsNav = [
+  {
+    label: i18n.t('devtools:generators.json.label'),
+    name: RouterName.devtoolsJsonGenerator,
+  },
+  {
+    label: i18n.t('devtools:generators.lorem.label'),
+    name: RouterName.devtoolsLoremIpsumGenerator,
+  },
+]
+
+watch(
+  () => route.name,
+  () => {
+    nextTick(() => {
+      scrollRef.value?.ps?.update()
+    })
+  },
+)
 </script>
 
 <template>
@@ -131,10 +153,25 @@ const webNav = [
             :is-active="isActiveRoute(item.name)"
           />
         </RouterLink>
+        <div class="text-text-muted my-2 text-[10px] uppercase">
+          {{ i18n.t("devtools:generators.label") }}
+        </div>
+        <RouterLink
+          v-for="item in generatorsNav"
+          :key="item.name"
+          class="cursor-default"
+          :to="{ name: item.name }"
+        >
+          <UiMenuItem
+            :label="item.label"
+            :is-active="isActiveRoute(item.name)"
+          />
+        </RouterLink>
       </PerfectScrollbar>
     </template>
     <template #right>
       <PerfectScrollbar
+        ref="scrollRef"
         class="h-full px-5 pb-5"
         :options="{ minScrollbarLength: 20 }"
       >
